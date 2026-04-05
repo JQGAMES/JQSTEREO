@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JQ STEREO – ONLINE TAKEDOWN</title>
+
+  <style>
+    :root {
+      --bg: #040604;
+      --bg2: #0b1510;
+      --panel: rgba(9, 14, 10, 0.94);
+      --green: #2f7a57;
+      --green-2: #4e9f73;
+      --green-3: #7ed39f;
+      --green-4: #b8ffd2;
+      --green-glow: rgba(80, 255, 150, 0.34);
+      --sand: #d6b98a;
+      --sand-soft: #eddcbf;
+      --text: #f2efe9;
+      --muted: #cfc2ad;
+      --line: rgba(214, 185, 138, 0.24);
+      --line-soft: rgba(214, 185, 138, 0.12);
+      --shadow: 0 18px 45px rgba(0, 0, 0, 0.32);
+      --header-height: 112px;
+      --menu-width: 270px;
+      --radius: 24px;
+      --max-content: 1180px;
+      --error: #ffb3b3;
+      --error-bg: rgba(120, 20, 20, 0.18);
+      --success: #baf5cf;
+      --overlay: rgba(0, 0, 0, 0.46);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      min-width: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(47, 122, 87, 0.18), transparent 26%),
+        radial-gradient(circle at top right, rgba(214, 185, 138, 0.08), transparent 22%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+      color: var(--text);
+      padding-top: var(--header-height);
+      overflow-x: hidden;
+      text-rendering: optimizeLegibility;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.04;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 4px 4px, 5px 5px;
+      mix-blend-mode: soft-light;
+      z-index: 1;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--header-height);
+      background: linear-gradient(180deg, rgba(3,5,4,0.98), rgba(7,11,8,0.94));
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 3000;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.26);
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at center, rgba(126,211,159,0.12), transparent 45%);
+    }
+
+    .header-title {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      text-align: center;
+      font-size: clamp(2rem, 7vw, 4.8rem);
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: clamp(0.14rem, 0.8vw, 0.9rem);
+      color: var(--sand-soft);
+      text-transform: uppercase;
+      text-shadow:
+        0 0 14px rgba(214,185,138,0.14),
+        0 0 28px rgba(80,255,150,0.08);
+      white-space: nowrap;
+      padding: 0 72px;
+    }
+
+    .menu-toggle {
+      position: fixed;
+      top: 18px;
+      left: 18px;
+      z-index: 3600;
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      border: 1px solid rgba(214,185,138,0.24);
+      background: rgba(6, 10, 7, 0.92);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.24);
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    }
+
+    .menu-toggle:hover {
+      transform: translateY(-1px);
+      background: rgba(10, 16, 12, 0.96);
+      border-color: rgba(214,185,138,0.34);
+    }
+
+    .menu-toggle span,
+    .menu-toggle::before,
+    .menu-toggle::after {
+      content: "";
+      position: absolute;
+      width: 22px;
+      height: 2.5px;
+      border-radius: 999px;
+      background: var(--sand-soft);
+      transition: transform .22s ease, opacity .22s ease, top .22s ease;
+    }
+
+    .menu-toggle span {
+      top: 24px;
+    }
+
+    .menu-toggle::before {
+      top: 17px;
+    }
+
+    .menu-toggle::after {
+      top: 31px;
+    }
+
+    .menu-toggle.open span {
+      opacity: 0;
+    }
+
+    .menu-toggle.open::before {
+      top: 24px;
+      transform: rotate(45deg);
+    }
+
+    .menu-toggle.open::after {
+      top: 24px;
+      transform: rotate(-45deg);
+    }
+
+    .menu-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay);
+      z-index: 3300;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity .22s ease, visibility .22s ease;
+    }
+
+    .menu-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .menu {
+      position: fixed;
+      top: var(--header-height);
+      left: 0;
+      width: min(var(--menu-width), 88vw);
+      height: calc(100vh - var(--header-height));
+      background: rgba(5, 8, 6, 0.98);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      padding: 18px 14px 16px 14px;
+      z-index: 3400;
+      backdrop-filter: blur(10px);
+      box-shadow: 14px 0 34px rgba(0,0,0,0.26);
+      gap: 12px;
+      transform: translateX(-100%);
+      transition: transform .24s ease;
+    }
+
+    .menu.open {
+      transform: translateX(0);
+    }
+
+    .menu-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .menu button.nav-btn {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line-soft);
+      color: var(--sand);
+      cursor: pointer;
+      font-size: 15px;
+      padding: 14px 12px;
+      border-radius: 14px;
+      text-align: center;
+      letter-spacing: 0.6px;
+      transition: background .18s ease, color .18s ease, transform .18s ease, border-color .18s ease;
+      width: 100%;
+      line-height: 1.15;
+      overflow: hidden;
+      white-space: normal;
+      word-break: break-word;
+    }
+
+    .menu button.nav-btn:hover,
+    .menu button.nav-btn.active {
+      background: rgba(79,156,116,0.12);
+      border-color: rgba(214,185,138,0.30);
+      color: #fff6e8;
+      transform: translateY(-1px);
+    }
+
+    .menu-footer {
+      margin-top: auto;
+      border-top: 1px solid var(--line-soft);
+      padding-top: 14px;
+    }
+
+    .menu-counter {
+      width: 100%;
+      min-height: 86px;
+      border-radius: 18px;
+      border: 1px solid rgba(214,185,138,0.18);
+      background: linear-gradient(180deg, rgba(8,12,9,0.96), rgba(6,9,7,0.98));
+      box-shadow:
+        0 12px 30px rgba(0,0,0,0.22),
+        0 0 18px rgba(80,255,150,0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 6px;
+      text-align: center;
+    }
+
+    .menu-counter-label {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    .menu-counter-number {
+      color: var(--sand-soft);
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      line-height: 1;
+      word-break: break-word;
+    }
+
+    main {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding: 22px;
+    }
+
+    .content-wrap {
+      width: min(100%, var(--max-content));
+      margin: 0 auto;
+    }
+
+    .page {
+      display: none;
+      animation: pageIn .25s ease;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    @keyframes pageIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow:
+          0 0 0 rgba(80,255,150,0.10),
+          0 0 28px rgba(80,255,150,0.30),
+          0 0 55px rgba(80,255,150,0.22),
+          0 0 95px rgba(126,211,159,0.14);
+      }
+      50% {
+        box-shadow:
+          0 0 10px rgba(80,255,150,0.20),
+          0 0 40px rgba(80,255,150,0.40),
+          0 0 90px rgba(126,211,159,0.30),
+          0 0 150px rgba(184,255,210,0.16);
+      }
+    }
+
+    @keyframes rotateDisc {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes shimmerSweep {
+      0% {
+        transform: translateX(-120%) translateY(-10%) rotate(12deg);
+        opacity: 0.12;
+      }
+      50% {
+        opacity: 0.34;
+      }
+      100% {
+        transform: translateX(120%) translateY(10%) rotate(12deg);
+        opacity: 0.12;
+      }
+    }
+
+    @keyframes foilFlash {
+      0%, 100% {
+        background-position: 0% 50%, 100% 50%, 50% 50%;
+        opacity: 0.30;
+      }
+      50% {
+        background-position: 100% 50%, 0% 50%, 50% 50%;
+        opacity: 0.52;
+      }
+    }
+
+    @keyframes sparkleShift {
+      0% { transform: translate3d(0, 0, 0); opacity: 0.28; }
+      50% { transform: translate3d(1.5%, -1.5%, 0); opacity: 0.5; }
+      100% { transform: translate3d(0, 0, 0); opacity: 0.28; }
+    }
+
+    .hero,
+    .card,
+    .entry {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      background: var(--panel);
+    }
+
+    .hero {
+      padding: 24px;
+      background:
+        radial-gradient(circle at top left, rgba(47,122,87,0.18), transparent 22%),
+        linear-gradient(145deg, #0b140f, #070907);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(
+        180deg,
+        rgba(255,255,255,0.02),
+        transparent 38%,
+        transparent 68%,
+        rgba(80,255,150,0.02)
+      );
+    }
+
+    .release-first {
+      color: var(--green-3);
+      font-size: 14px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 700;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero h1 {
+      font-size: clamp(34px, 6vw, 58px);
+      color: var(--sand);
+      margin-top: 10px;
+      line-height: 0.98;
+      letter-spacing: 3px;
+      text-shadow: 0 0 16px rgba(214,185,138,0.10);
+      position: relative;
+      z-index: 2;
+    }
+
+    .release-box {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .release-item {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .release-item small {
+      display: block;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 12px;
+    }
+
+    .release-item strong {
+      color: var(--green-3);
+      font-size: 18px;
+    }
+
+    .glitch-wrap {
+      margin-top: 22px;
+      position: relative;
+      border: 1px solid rgba(214, 185, 138, 0.28);
+      border-radius: 18px;
+      overflow: hidden;
+      background: #000;
+      width: 100%;
+      animation: pulseGlow 3.4s ease-in-out infinite;
+      box-shadow:
+        0 0 0 1px rgba(47,122,87,0.18),
+        0 0 35px rgba(80,255,150,0.35),
+        0 0 80px rgba(80,255,150,0.18),
+        0 0 140px rgba(126,211,159,0.10);
+    }
+
+    .glitch-wrap::before {
+      content: "";
+      position: absolute;
+      inset: -10%;
+      pointer-events: none;
+      z-index: 4;
+      background:
+        linear-gradient(115deg,
+          transparent 10%,
+          rgba(255,255,255,0.05) 20%,
+          rgba(255,255,255,0.22) 28%,
+          rgba(184,255,210,0.18) 32%,
+          rgba(255,255,255,0.04) 38%,
+          transparent 48%);
+      mix-blend-mode: screen;
+      animation: shimmerSweep 4.8s linear infinite;
+    }
+
+    .glitch-wrap::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 5;
+      background:
+        linear-gradient(120deg,
+          rgba(255, 80, 180, 0.10),
+          rgba(255,255,255,0.03),
+          rgba(90, 255, 230, 0.12),
+          rgba(255, 220, 90, 0.10),
+          rgba(180, 120, 255, 0.12)),
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.12) 0 1px, transparent 2px),
+        radial-gradient(circle at 70% 35%, rgba(255,255,255,0.12) 0 1px, transparent 2px),
+        radial-gradient(circle at 40% 75%, rgba(255,255,255,0.10) 0 1px, transparent 2px),
+        radial-gradient(circle at 85% 80%, rgba(255,255,255,0.12) 0 1px, transparent 2px);
+      background-size: 240% 240%, 120px 120px, 150px 150px, 170px 170px, 140px 140px;
+      mix-blend-mode: screen;
+      opacity: 0.34;
+      animation: foilFlash 6s ease-in-out infinite, sparkleShift 3.6s ease-in-out infinite;
+    }
+
+    .glow-ring {
+      position: absolute;
+      inset: -18px;
+      z-index: 0;
+      border-radius: 26px;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(126,211,159,0.20), transparent 38%),
+        radial-gradient(circle at 30% 35%, rgba(80,255,150,0.18), transparent 26%),
+        radial-gradient(circle at 70% 65%, rgba(184,255,210,0.14), transparent 26%);
+      filter: blur(18px);
+      opacity: 1;
+    }
+
+    .cover-frame {
+      position: relative;
+      z-index: 2;
+    }
+
+    .glitch-wrap img {
+      width: 100%;
+      position: relative;
+      z-index: 2;
+    }
+
+    .glitch-lines {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 3;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.00) 0px,
+        rgba(255,255,255,0.00) 3px,
+        rgba(255,255,255,0.03) 4px
+      );
+      opacity: 0.22;
+    }
+
+    .preview-player {
+      position: relative;
+      margin-top: 22px;
+      border: 1px solid rgba(214,185,138,0.20);
+      border-radius: 22px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top left, rgba(80,255,150,0.08), transparent 30%),
+        linear-gradient(145deg, rgba(10,16,12,0.96), rgba(6,9,7,0.96));
+      box-shadow:
+        0 0 0 1px rgba(214,185,138,0.06),
+        0 0 24px rgba(80,255,150,0.06);
+      padding: 18px;
+      width: 100%;
+    }
+
+    .preview-top {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 84px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .preview-disc {
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      position: relative;
+      background:
+        radial-gradient(circle at center, rgba(214,185,138,0.85) 0 6px, transparent 7px),
+        radial-gradient(circle at center, #101010 0 18px, #050505 19px 40px, #181818 41px 100%);
+      border: 1px solid rgba(214,185,138,0.24);
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.04),
+        0 0 18px rgba(80,255,150,0.08);
+    }
+
+    .preview-disc.playing {
+      animation: rotateDisc 4s linear infinite;
+    }
+
+    .preview-info {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: auto auto;
+      row-gap: 8px;
+      align-content: start;
+    }
+
+    .preview-label {
+      color: var(--green-3);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.2;
+      min-height: 14px;
+    }
+
+    .preview-title {
+      color: var(--sand-soft);
+      font-size: clamp(1rem, 2.2vw, 1.18rem);
+      letter-spacing: 1px;
+      font-weight: 700;
+      line-height: 1.25;
+      min-height: 24px;
+      overflow-wrap: anywhere;
+    }
+
+    .preview-controls {
+      position: relative;
+      z-index: 2;
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      width: 100%;
+    }
+
+    .preview-btn {
+      width: 100%;
+      min-width: 0;
+      padding: 14px 10px;
+      text-align: center;
+      border-radius: 14px;
+      border: 1px solid rgba(214,185,138,0.22);
+      background: linear-gradient(135deg, rgba(214,185,138,0.95), rgba(191,158,111,0.95));
+      color: #0b0b0b;
+      font-weight: 800;
+      font-size: clamp(0.94rem, 2vw, 1rem);
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: transform .16s ease, opacity .16s ease, box-shadow .16s ease;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.16);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .preview-btn:hover {
+      transform: translateY(-1px);
+      opacity: 0.97;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.18);
+    }
+
+    .preview-progress-wrap {
+      position: relative;
+      z-index: 2;
+      margin-top: 18px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .preview-progress {
+      width: 100%;
+      height: 10px;
+      appearance: none;
+      background: rgba(255,255,255,0.08);
+      border-radius: 999px;
+      outline: none;
+      cursor: pointer;
+      border: 1px solid rgba(214,185,138,0.12);
+      overflow: hidden;
+    }
+
+    .preview-progress::-webkit-slider-thumb {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--sand-soft);
+      border: none;
+      box-shadow: 0 0 10px rgba(214,185,138,0.16);
+    }
+
+    .preview-progress::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--sand-soft);
+      border: none;
+    }
+
+    .preview-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.4px;
+      min-height: 14px;
+    }
+
+    .player-status {
+      position: relative;
+      z-index: 2;
+      margin-top: 14px;
+      min-height: 18px;
+      font-size: 13px;
+      line-height: 1.35;
+      color: var(--muted);
+    }
+
+    .player-status.error {
+      color: var(--error);
+      background: var(--error-bg);
+      border: 1px solid rgba(255, 179, 179, 0.18);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .player-status.success {
+      color: var(--success);
+    }
+
+    .statement {
+      margin-top: 22px;
+      line-height: 1.72;
+      color: #e6e1d8;
+      border-top: 1px solid rgba(214,185,138,0.14);
+      padding-top: 18px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .statement strong {
+      color: var(--sand-soft);
+    }
+
+    .card {
+      padding: 20px;
+      margin-top: 20px;
+      background: rgba(11,15,12,0.90);
+      width: min(100%, 1120px);
+    }
+
+    .card h2 {
+      color: var(--sand-soft);
+      margin-bottom: 14px;
+      letter-spacing: 1px;
+    }
+
+    .card p {
+      line-height: 1.72;
+    }
+
+    .fanbase-title {
+      font-size: clamp(2.4rem, 9vw, 5rem);
+      line-height: 0.88;
+      letter-spacing: 0.18rem;
+      color: var(--sand-soft);
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      color: var(--muted);
+      margin-top: 14px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      letter-spacing: .4px;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      background: #000;
+      border: 1px solid var(--line);
+      color: white;
+      border-radius: 14px;
+    }
+
+    textarea {
+      min-height: 140px;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus {
+      outline: 1px solid rgba(214,185,138,0.42);
+      border-color: rgba(214,185,138,0.42);
+    }
+
+    .primary,
+    .page-btn {
+      margin-top: 14px;
+      padding: 11px 14px;
+      background: var(--sand);
+      border: none;
+      color: black;
+      cursor: pointer;
+      font-weight: 700;
+      border-radius: 12px;
+    }
+
+    .entries-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .entries {
+      margin-top: 14px;
+    }
+
+    .entry {
+      padding: 15px;
+      margin-top: 10px;
+      background: rgba(0,0,0,0.24);
+    }
+
+    .entry-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .entry-name {
+      color: var(--sand-soft);
+      font-weight: 700;
+    }
+
+    .entry-date {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .entry-message {
+      margin-top: 12px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .heart {
+      cursor: pointer;
+      margin-top: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      color: var(--text);
+      min-width: 84px;
+      justify-content: center;
+    }
+
+    .heart.liked {
+      background: rgba(199,93,105,0.16);
+      border-color: rgba(199,93,105,0.45);
+      cursor: default;
+    }
+
+    .pagination {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .page-btn {
+      margin-top: 0;
+      min-width: 44px;
+      height: 44px;
+    }
+
+    .page-btn.active {
+      background: var(--green-2);
+      color: #fff;
+    }
+
+    .empty {
+      border: 1px dashed var(--line);
+      padding: 20px;
+      margin-top: 12px;
+      border-radius: 16px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    @media (max-width: 760px) {
+      :root {
+        --header-height: 96px;
+        --menu-width: 250px;
+      }
+
+      .header-title {
+        padding: 0 64px;
+      }
+
+      main {
+        padding: 14px 14px 18px 14px;
+      }
+
+      .menu {
+        width: min(var(--menu-width), 90vw);
+        padding: 14px 12px 12px 12px;
+      }
+
+      .hero {
+        padding: 18px;
+      }
+
+      .hero h1 {
+        font-size: 32px;
+        letter-spacing: 2px;
+      }
+
+      .preview-top {
+        grid-template-columns: 72px minmax(0, 1fr);
+        gap: 14px;
+      }
+
+      .preview-disc {
+        width: 72px;
+        height: 72px;
+      }
+
+      .preview-player {
+        padding: 16px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      :root {
+        --header-height: 88px;
+        --menu-width: 230px;
+      }
+
+      .menu-toggle {
+        top: 14px;
+        left: 14px;
+        width: 48px;
+        height: 48px;
+      }
+
+      .menu-toggle::before {
+        top: 15px;
+      }
+
+      .menu-toggle span {
+        top: 22px;
+      }
+
+      .menu-toggle::after {
+        top: 29px;
+      }
+
+      .menu-toggle.open::before,
+      .menu-toggle.open::after {
+        top: 22px;
+      }
+
+      .header-title {
+        padding: 0 58px;
+      }
+
+      main {
+        padding: 12px 10px 16px 10px;
+      }
+
+      .entry-top {
+        flex-direction: column;
+      }
+
+      .hero,
+      .card {
+        border-radius: 18px;
+      }
+
+      .hero {
+        padding: 14px;
+      }
+
+      .preview-title {
+        font-size: 0.98rem;
+      }
+
+      .preview-btn {
+        padding: 12px 6px;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+      }
+
+      .preview-player {
+        padding: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-title">JQ STEREO</div>
+  </div>
+
+  <button id="menuToggle" class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false">
+    <span></span>
+  </button>
+
+  <div id="menuOverlay" class="menu-overlay"></div>
+
+  <aside id="sideMenu" class="menu" aria-hidden="true">
+    <div class="menu-nav">
+      <button class="nav-btn active" data-page="home" type="button">HOME</button>
+      <button class="nav-btn" data-page="story" type="button">STORY</button>
+      <button class="nav-btn" data-page="fanbase" type="button">FANBASE</button>
+    </div>
+
+    <div class="menu-footer">
+      <div class="menu-counter">
+        <div class="menu-counter-label">Visitors</div>
+        <div id="count" class="menu-counter-number">0</div>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <div class="content-wrap">
+      <div id="home" class="page active">
+        <div class="hero">
+          <div class="release-first">FIRST ALBUM RELEASE</div>
+          <h1>ONLINE TAKEDOWN</h1>
+
+          <div class="release-box">
+            <div class="release-item">
+              <small>Pre Order</small>
+              <strong>06.04.2026</strong>
+            </div>
+            <div class="release-item">
+              <small>Release</small>
+              <strong>16.04.2026</strong>
+            </div>
+          </div>
+
+          <div class="cover-frame">
+            <div class="glow-ring"></div>
+            <div class="glitch-wrap">
+              <img src="album-cover.jpg" alt="ONLINE TAKEDOWN album cover by JQ STEREO">
+              <div class="glitch-lines"></div>
+            </div>
+          </div>
+
+          <div class="preview-player">
+            <div class="preview-top">
+              <div class="preview-disc" id="previewDisc"></div>
+
+              <div class="preview-info">
+                <div class="preview-label">Preview Track</div>
+                <div class="preview-title">JQ STEREO - The GOAT</div>
+              </div>
+            </div>
+
+            <div class="preview-controls">
+              <button class="preview-btn" id="playBtn" type="button">PLAY</button>
+              <button class="preview-btn" id="pauseBtn" type="button">PAUSE</button>
+            </div>
+
+            <div class="preview-progress-wrap">
+              <input id="progressBar" class="preview-progress" type="range" min="0" max="100" value="0">
+              <div class="preview-meta">
+                <span id="currentTime">00:00</span>
+                <span id="duration">00:00</span>
+              </div>
+            </div>
+
+            <div id="playerStatus" class="player-status">Ready</div>
+          </div>
+
+          <div class="statement">
+            <strong>Artist Statement</strong>
+            <br><br>
+            With my first album, I explore the realization that in the age of computers, our lives are increasingly controlled, confined, and shaped by forces beyond our awareness. This sense of captivity runs throughout the project, giving space to emotions such as anger, loneliness, and despair, unfiltered and intense.
+            <br><br>
+            Nature becomes a crucial anchor within this struggle, a way to reconnect and begin breaking free from this invisible form of enslavement. As the album progresses, this escape becomes more tangible, leading toward a transformation into a new, more positive era defined by peace.
+            <br><br>
+            Between loud, aggressive tracks, there are moments of retreat into nature, where everything feels calm and balanced. Dreams also play an important role: they offer hope and reveal that there is a way out. They remind us that freedom is possible, that we can move through the world lightly and freely, like a goat jumping without limits.
+          </div>
+        </div>
+      </div>
+
+      <div id="story" class="page">
+        <div class="card">
+          <h2>Artist Biography</h2>
+          <p>
+            JQ STEREO, born in 1987 in Germany, is an artist driven by a deep curiosity for the complexity of human experience. From an early age, he began exploring music and its emotional impact, regardless of genre, developing a broad and open understanding of sound, expression, and feeling.
+            <br><br>
+            Operating under the pseudonym JQ STEREO, he first stepped into the artistic world through music. From the beginning, his creative focus has been clear: language, meaning, and above all, the emotional impact of his work. Rather than prioritizing conventional structures, he aims to capture and convey authentic feelings, creating atmospheres that resonate with listeners on a personal level.
+            <br><br>
+            Central to his artistic identity is a strong connection to people. Having always worked closely with others, JQ STEREO draws inspiration from real interactions and shared experiences. He is particularly motivated by the desire to influence people in a positive way whether through music, expression, or the emotions his art evokes.
+            <br><br>
+            His work stands as a reflection of both introspection and connection: a continuous attempt to translate thoughts and feelings into something tangible, meaningful, and human.
+          </p>
+        </div>
+      </div>
+
+      <div id="fanbase" class="page">
+        <div class="card">
+          <div class="fanbase-title">FAN<br>BASE</div>
+
+          <label for="name">Name</label>
+          <input id="name" maxlength="40" placeholder="Name">
+
+          <label for="msg">Comment</label>
+          <textarea id="msg" maxlength="500" placeholder="Comment"></textarea>
+
+          <button id="postButton" class="primary" type="button">Post</button>
+        </div>
+
+        <div class="card">
+          <div class="entries-head">
+            <h2>Latest Entries</h2>
+            <div id="entryCount" style="color: var(--muted); font-size: 14px;"></div>
+          </div>
+
+          <div id="entries" class="entries"></div>
+          <div id="pages" class="pagination"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      push,
+      onValue,
+      runTransaction,
+      serverTimestamp,
+      query,
+      orderByChild
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const app = initializeApp({
+      databaseURL: "https://jqstereo-default-rtdb.europe-west1.firebasedatabase.app/"
+    });
+
+    const db = getDatabase(app);
+    const commentsQuery = query(ref(db, "comments"), orderByChild("createdAt"));
+    const visitsRef = ref(db, "visits");
+
+    const entriesEl = document.getElementById("entries");
+    const pagesEl = document.getElementById("pages");
+    const countEl = document.getElementById("count");
+    const entryCountEl = document.getElementById("entryCount");
+    const postButton = document.getElementById("postButton");
+    const nameInput = document.getElementById("name");
+    const msgInput = document.getElementById("msg");
+
+    const COMMENTS_PER_PAGE = 5;
+    const LIKES_STORAGE_KEY = "jqStereoLikedComments";
+    let currentPage = 1;
+    let commentList = [];
+
+    runTransaction(visitsRef, (current) => (current || 0) + 1);
+
+    onValue(visitsRef, (snap) => {
+      countEl.textContent = snap.val() || 0;
+    });
+
+    onValue(commentsQuery, (snap) => {
+      const data = snap.val() || {};
+      commentList = Object.entries(data)
+        .map(([id, value]) => ({ id, ...value }))
+        .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+      const totalPages = Math.max(1, Math.ceil(commentList.length / COMMENTS_PER_PAGE));
+      if (currentPage > totalPages) currentPage = totalPages;
+
+      renderComments();
+      renderPagination(totalPages);
+      entryCountEl.textContent = `${commentList.length} entr${commentList.length === 1 ? "y" : "ies"}`;
+    });
+
+    function getLikedComments() {
+      try {
+        return JSON.parse(localStorage.getItem(LIKES_STORAGE_KEY)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveLikedComments(ids) {
+      localStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify(ids));
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatDate(timestamp) {
+      if (!timestamp) return "";
+      return new Date(timestamp).toLocaleString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    function renderComments() {
+      entriesEl.innerHTML = "";
+
+      if (!commentList.length) {
+        entriesEl.innerHTML = '<div class="empty">No comments yet. Be the first to leave one.</div>';
+        return;
+      }
+
+      const likedIds = getLikedComments();
+      const start = (currentPage - 1) * COMMENTS_PER_PAGE;
+      const visible = commentList.slice(start, start + COMMENTS_PER_PAGE);
+
+      visible.forEach((comment) => {
+        const liked = likedIds.includes(comment.id);
+        const el = document.createElement("div");
+        el.className = "entry";
+        el.innerHTML = `
+          <div class="entry-top">
+            <div>
+              <div class="entry-name">${escapeHtml(comment.name || "Anonymous")}</div>
+              <div class="entry-date">${formatDate(comment.createdAt)}</div>
+            </div>
+            <button class="heart ${liked ? "liked" : ""}" ${liked ? "disabled" : ""} data-id="${comment.id}" type="button">
+              <span>❤️</span>
+              <span>${comment.hearts || 0}</span>
+            </button>
+          </div>
+          <div class="entry-message">${escapeHtml(comment.msg || "")}</div>
+        `;
+        entriesEl.appendChild(el);
+      });
+
+      document.querySelectorAll(".heart[data-id]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const id = button.dataset.id;
+          const likedIds = getLikedComments();
+          if (likedIds.includes(id)) return;
+
+          const heartRef = ref(db, `comments/${id}/hearts`);
+          try {
+            await runTransaction(heartRef, (current) => (current || 0) + 1);
+            saveLikedComments([...likedIds, id]);
+          } catch (error) {
+            console.error("Heart update failed:", error);
+            alert("Updating the heart failed");
+          }
+        });
+      });
+    }
+
+    function renderPagination(totalPages) {
+      pagesEl.innerHTML = "";
+      if (totalPages <= 1) return;
+
+      for (let i = 1; i <= totalPages; i += 1) {
+        const btn = document.createElement("button");
+        btn.className = `page-btn${i === currentPage ? " active" : ""}`;
+        btn.textContent = i;
+        btn.type = "button";
+        btn.addEventListener("click", () => {
+          currentPage = i;
+          renderComments();
+          renderPagination(totalPages);
+        });
+        pagesEl.appendChild(btn);
+      }
+    }
+
+    async function addComment() {
+      const name = nameInput.value.trim();
+      const msg = msgInput.value.trim();
+
+      if (!name || !msg) return;
+
+      postButton.disabled = true;
+      postButton.textContent = "Posting...";
+
+      try {
+        await push(ref(db, "comments"), {
+          name,
+          msg,
+          hearts: 0,
+          createdAt: Date.now(),
+          createdAtServer: serverTimestamp()
+        });
+
+        nameInput.value = "";
+        msgInput.value = "";
+        currentPage = 1;
+      } catch (error) {
+        console.error("Could not save comment:", error);
+        alert("Saving the comment failed");
+      } finally {
+        postButton.disabled = false;
+        postButton.textContent = "Post";
+      }
+    }
+
+    postButton.addEventListener("click", addComment);
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
+
+  <script>
+    const menuToggle = document.getElementById("menuToggle");
+    const sideMenu = document.getElementById("sideMenu");
+    const menuOverlay = document.getElementById("menuOverlay");
+    const navButtons = document.querySelectorAll(".nav-btn");
+
+    function openMenu() {
+      sideMenu.classList.add("open");
+      menuOverlay.classList.add("open");
+      menuToggle.classList.add("open");
+      menuToggle.setAttribute("aria-expanded", "true");
+      sideMenu.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeMenu() {
+      sideMenu.classList.remove("open");
+      menuOverlay.classList.remove("open");
+      menuToggle.classList.remove("open");
+      menuToggle.setAttribute("aria-expanded", "false");
+      sideMenu.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    function toggleMenu() {
+      if (sideMenu.classList.contains("open")) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    }
+
+    function showPage(id, button) {
+      const targetPage = document.getElementById(id);
+      if (!targetPage) return;
+
+      document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
+      targetPage.classList.add("active");
+
+      navButtons.forEach((b) => b.classList.remove("active"));
+      if (button) button.classList.add("active");
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      closeMenu();
+    }
+
+    menuToggle.addEventListener("click", toggleMenu);
+    menuOverlay.addEventListener("click", closeMenu);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && sideMenu.classList.contains("open")) {
+        closeMenu();
+      }
+    });
+
+    navButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        showPage(button.dataset.page, button);
+      });
+    });
+
+    const previewDisc = document.getElementById("previewDisc");
+    const playBtn = document.getElementById("playBtn");
+    const pauseBtn = document.getElementById("pauseBtn");
+    const progressBar = document.getElementById("progressBar");
+    const currentTimeEl = document.getElementById("currentTime");
+    const durationEl = document.getElementById("duration");
+    const playerStatus = document.getElementById("playerStatus");
+
+    function setPlayerStatus(message = "", type = "") {
+      playerStatus.textContent = message;
+      playerStatus.className = "player-status";
+      if (type) {
+        playerStatus.classList.add(type);
+      }
+    }
+
+    function formatAudioTime(seconds) {
+      if (!isFinite(seconds)) return "00:00";
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    }
+
+    function setPlayingState(isPlaying) {
+      previewDisc.classList.toggle("playing", isPlaying);
+    }
+
+    const player = new Howl({
+      src: ["./GOAT.mp3", "./GOAT.wav"],
+      html5: true,
+      preload: true,
+      onload: function () {
+        durationEl.textContent = formatAudioTime(player.duration());
+        setPlayerStatus("Audio loaded", "success");
+      },
+      onloaderror: function (id, error) {
+        console.error("Howler load error:", error);
+        setPlayerStatus("Audio could not be loaded.", "error");
+      },
+      onplayerror: function (id, error) {
+        console.error("Howler play error:", error);
+        setPlayerStatus("Playback failed. The browser blocked or rejected the file.", "error");
+      },
+      onplay: function () {
+        setPlayingState(true);
+        setPlayerStatus("Audio is playing", "success");
+      },
+      onpause: function () {
+        setPlayingState(false);
+        setPlayerStatus("Audio paused");
+      },
+      onstop: function () {
+        setPlayingState(false);
+      },
+      onend: function () {
+        setPlayingState(false);
+        progressBar.value = 0;
+        currentTimeEl.textContent = "00:00";
+        setPlayerStatus("Audio ended");
+      }
+    });
+
+    let progressTimer = null;
+
+    function startProgressLoop() {
+      stopProgressLoop();
+      progressTimer = setInterval(() => {
+        const duration = player.duration();
+        const current = player.seek();
+
+        if (typeof current === "number" && isFinite(duration) && duration > 0) {
+          progressBar.value = (current / duration) * 100;
+          currentTimeEl.textContent = formatAudioTime(current);
+          durationEl.textContent = formatAudioTime(duration);
+        }
+      }, 200);
+    }
+
+    function stopProgressLoop() {
+      if (progressTimer) {
+        clearInterval(progressTimer);
+        progressTimer = null;
+      }
+    }
+
+    playBtn.addEventListener("click", () => {
+      try {
+        player.play();
+        startProgressLoop();
+      } catch (error) {
+        console.error("Howler play exception:", error);
+        setPlayerStatus("Playback failed.", "error");
+      }
+    });
+
+    pauseBtn.addEventListener("click", () => {
+      player.pause();
+      stopProgressLoop();
+    });
+
+    progressBar.addEventListener("input", () => {
+      const duration = player.duration();
+      if (isFinite(duration) && duration > 0) {
+        player.seek((progressBar.value / 100) * duration);
+      }
+    });
+
+    window.addEventListener("beforeunload", () => {
+      stopProgressLoop();
+      player.unload();
+    });
+  </script>
+</body>
+</html>
