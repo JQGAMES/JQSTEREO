@@ -1346,7 +1346,7 @@
     function setPlayingState(isPlaying) {
       previewDisc.classList.toggle("playing", isPlaying);
       previewEq.classList.toggle("playing", isPlaying);
-      playBtn.textContent = isPlaying ? "PLAYING" : "PREVIEW";
+      playBtn.textContent = isPlaying ? "PLAY" : "PLAY";
 
       if (isPlaying) {
         startBeat();
