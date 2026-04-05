@@ -19,13 +19,13 @@
       --text: #f2efe9;
       --muted: #cfc2ad;
       --line: rgba(214, 185, 138, 0.24);
-      --danger: #c75d69;
       --shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
       --header-height: 120px;
       --menu-width: 124px;
       --footer-height: 60px;
       --radius: 24px;
       --max: 1080px;
+      --player-btn-width: 120px;
     }
 
     * {
@@ -217,6 +217,21 @@
     @keyframes rotateDisc {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
+    }
+
+    @keyframes equalizerA {
+      0%,100% { height: 10px; }
+      50% { height: 28px; }
+    }
+
+    @keyframes equalizerB {
+      0%,100% { height: 18px; }
+      50% { height: 36px; }
+    }
+
+    @keyframes equalizerC {
+      0%,100% { height: 14px; }
+      50% { height: 24px; }
     }
 
     .hero,
@@ -535,12 +550,18 @@
       display: flex;
       gap: 8px;
       align-items: center;
+      justify-content: flex-start;
       margin-top: 18px;
       flex-wrap: nowrap;
     }
 
     .preview-btn {
-      padding: 12px 18px;
+      width: var(--player-btn-width);
+      min-width: var(--player-btn-width);
+      max-width: var(--player-btn-width);
+      flex: 0 0 var(--player-btn-width);
+      padding: 12px 0;
+      text-align: center;
       border-radius: 14px;
       border: 1px solid rgba(214,185,138,0.22);
       background: linear-gradient(135deg, rgba(214,185,138,0.95), rgba(191,158,111,0.95));
@@ -551,23 +572,12 @@
       transition: transform .2s ease, opacity .2s ease, box-shadow .2s ease;
       box-shadow: 0 8px 20px rgba(0,0,0,0.18);
       white-space: nowrap;
-      flex: 0 0 auto;
     }
 
     .preview-btn:hover {
       transform: translateY(-1px);
       opacity: 0.97;
       box-shadow: 0 10px 22px rgba(0,0,0,0.22);
-    }
-
-    .preview-btn.play {
-      min-width: 124px;
-    }
-
-    .preview-btn.pause {
-      min-width: 82px;
-      padding: 12px 14px;
-      font-size: 0.9rem;
     }
 
     .preview-progress-wrap {
@@ -873,6 +883,7 @@
       :root {
         --menu-width: 95px;
         --header-height: 96px;
+        --player-btn-width: 96px;
       }
 
       main {
@@ -913,6 +924,7 @@
       :root {
         --menu-width: 86px;
         --header-height: 88px;
+        --player-btn-width: 82px;
       }
 
       .entry-top {
@@ -921,16 +933,6 @@
 
       .preview-controls {
         width: 100%;
-      }
-
-      .preview-btn.play {
-        flex: 1 1 auto;
-        min-width: 0;
-      }
-
-      .preview-btn.pause {
-        flex: 0 0 auto;
-        min-width: 78px;
       }
 
       .preview-title {
@@ -993,8 +995,8 @@
           </div>
 
           <div class="preview-controls">
-            <button class="preview-btn play" id="playBtn" type="button">PLAY</button>
-            <button class="preview-btn pause" id="pauseBtn" type="button">PAUSE</button>
+            <button class="preview-btn" id="playBtn" type="button">PLAY</button>
+            <button class="preview-btn" id="pauseBtn" type="button">PAUSE</button>
           </div>
 
           <div class="preview-progress-wrap">
@@ -1022,8 +1024,8 @@
             </div>
           </div>
 
-          <audio id="previewAudio" preload="metadata">
-            <source src="The GOAT_1.wav" type="audio/wav">
+          <audio id="previewAudio" preload="auto">
+            <source src="GOAT.wav" type="audio/wav">
             Your browser does not support the audio element.
           </audio>
         </div>
@@ -1155,7 +1157,7 @@
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
-        .replace(/\"/g, "&quot;")
+        .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
     }
 
@@ -1306,6 +1308,8 @@
 
     let beatInterval = null;
 
+    previewAudio.load();
+
     function formatAudioTime(seconds) {
       if (!isFinite(seconds)) return "00:00";
       const mins = Math.floor(seconds / 60);
@@ -1346,7 +1350,6 @@
     function setPlayingState(isPlaying) {
       previewDisc.classList.toggle("playing", isPlaying);
       previewEq.classList.toggle("playing", isPlaying);
-      playBtn.textContent = isPlaying ? "PLAY" : "PREVIEW";
 
       if (isPlaying) {
         startBeat();
@@ -1364,7 +1367,7 @@
         }
       } catch (error) {
         console.error("Audio playback failed:", error);
-        alert("Audio playback failed. Please check the WAV file.");
+        alert("Audio playback failed. Please check GOAT.wav.");
       }
     });
 
